@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#EEF1F6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0E121B" media="(prefers-color-scheme: dark)">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" href="icon-192.png">
+<style>:root{padding-top:env(safe-area-inset-top,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}</style>
+<title>Registro Schedine</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Schedine">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: app a una colonna stile iOS, header fisso in alto, tab bar fissa in basso, contenuto a schede */
+:root{
+  --bg:#EEF1F6; --surface:#FFFFFF; --surface-2:#F5F7FB; --line:#DCE1EA;
+  --fg:#141A26; --muted:#677187; --accent:#2F55D4; --accent-ink:#FFFFFF;
+  --win:#14895C; --win-soft:#DDF3EA; --loss:#C83A33; --loss-soft:#FBE3E1;
+  --void:#8A6D1E; --void-soft:#F6EED5; --open:#3D5A99; --open-soft:#E2E9F7;
+  --display:"Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;
+  --body:"Figtree", -apple-system, "Segoe UI", system-ui, sans-serif;
+  --r:16px;
+}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
+  --bg:#0E121B; --surface:#171D2A; --surface-2:#1E2535; --line:#2A3347;
+  --fg:#E9EDF5; --muted:#9099AE; --accent:#7C9BFF; --accent-ink:#0E121B;
+  --win:#3FD09A; --win-soft:#123528; --loss:#FF7A70; --loss-soft:#3A1A1A;
+  --void:#E2C26A; --void-soft:#33291A; --open:#9DB4F0; --open-soft:#1D2740;
+  color-scheme:dark }}
+:root[data-theme="dark"]{
+  --bg:#0E121B; --surface:#171D2A; --surface-2:#1E2535; --line:#2A3347;
+  --fg:#E9EDF5; --muted:#9099AE; --accent:#7C9BFF; --accent-ink:#0E121B;
+  --win:#3FD09A; --win-soft:#123528; --loss:#FF7A70; --loss-soft:#3A1A1A;
+  --void:#E2C26A; --void-soft:#33291A; --open:#9DB4F0; --open-soft:#1D2740;
+  color-scheme:dark }
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:15px;line-height:1.45;-webkit-font-smoothing:antialiased;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  padding-block:0 calc(92px + env(safe-area-inset-bottom,0px))}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--bg)}
+.wrap{max-width:560px;margin:0 auto}
+.num{font-variant-numeric:tabular-nums}
+header.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--bg);padding-block:14px 10px;display:flex;align-items:center;justify-content:space-between;gap:12px}
+header.top h1{font-family:var(--display);font-weight:800;font-size:26px;letter-spacing:-.02em;margin:0;text-wrap:balance}
+.sub{color:var(--muted);font-size:13px}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{border:1px solid var(--line);background:var(--surface);color:var(--fg);border-radius:999px;padding:7px 13px;font:600 13px var(--body);white-space:nowrap;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--fg);color:var(--bg);border-color:var(--fg)}
+button{font-family:var(--body)}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,.chip:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+section.view{display:flex;flex-direction:column;gap:14px;padding-top:4px}
+.hero{background:var(--surface);border-radius:var(--r);padding:18px;display:flex;flex-direction:column;gap:6px}
+.label{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.big{font-family:var(--display);font-weight:800;font-size:44px;letter-spacing:-.03em;line-height:1}
+.pos{color:var(--win)} .neg{color:var(--loss)}
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border-radius:12px;overflow:hidden;margin-top:10px}
+.kpi{background:var(--surface-2);padding:10px 10px;display:flex;flex-direction:column;gap:2px;min-width:0}
+.kpi b{font-size:17px;font-weight:700}
+.kpi span{font-size:11.5px;color:var(--muted)}
+.card{background:var(--surface);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.card h2{font-family:var(--display);font-weight:600;font-size:18px;margin:0;letter-spacing:-.01em}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.chart{width:100%;height:auto;display:block}
+.bar{height:10px;border-radius:5px;background:var(--surface-2);overflow:hidden;display:flex}
+.bar i{display:block;height:100%}
+.list{display:flex;flex-direction:column}
+.bet{display:grid;grid-template-columns:1fr auto;gap:2px 12px;padding:12px 0;border-top:1px solid var(--line);cursor:pointer;background:none;border-left:0;border-right:0;border-bottom:0;text-align:left;color:inherit;width:100%;font:inherit}
+.bet:first-child{border-top:0}
+.bet .ev{font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bet .meta{color:var(--muted);font-size:12.5px;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bet .pl{font-weight:700;text-align:right}
+.pill{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;justify-self:end}
+.p-vinta{background:var(--win-soft);color:var(--win)} .p-persa{background:var(--loss-soft);color:var(--loss)}
+.p-rimborsata,.p-cashout{background:var(--void-soft);color:var(--void)} .p-incorso{background:var(--open-soft);color:var(--open)}
+.tbl{width:100%;border-collapse:collapse;font-size:13.5px}
+.tbl th{text-align:left;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:700;padding:6px 4px;border-bottom:1px solid var(--line)}
+.tbl td{padding:9px 4px;border-bottom:1px solid var(--line)}
+.tbl td:not(:first-child),.tbl th:not(:first-child){text-align:right}
+.tbl tr:last-child td{border-bottom:0}
+.scroll{overflow-x:auto}
+form{display:flex;flex-direction:column;gap:12px}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}
+.field label{font-size:12.5px;font-weight:600;color:var(--muted)}
+input,select,textarea{font:500 16px var(--body);color:var(--fg);background:var(--surface-2);border:1px solid var(--line);border-radius:11px;padding:11px 12px;width:100%;min-width:0}
+textarea{font-size:13px;min-height:110px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.seg{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;background:var(--surface-2);padding:4px;border-radius:12px;border:1px solid var(--line)}
+.seg button{border:0;background:none;color:var(--muted);font-weight:700;font-size:12px;padding:9px 2px;border-radius:9px;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--fg);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.btn{border:0;border-radius:12px;padding:13px 16px;font-weight:700;font-size:15px;cursor:pointer;background:var(--accent);color:var(--accent-ink)}
+.btn.ghost{background:var(--surface-2);color:var(--fg);border:1px solid var(--line)}
+.btn.danger{background:var(--loss-soft);color:var(--loss)}
+.btn.sm{padding:8px 12px;font-size:13px}
+.preview{background:var(--surface-2);border-radius:12px;padding:12px;display:flex;justify-content:space-between;font-weight:600}
+.note{font-size:12.5px;color:var(--muted)}
+.banner{background:var(--open-soft);color:var(--open);border-radius:12px;padding:10px 12px;font-size:13px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.empty{text-align:center;color:var(--muted);padding:26px 10px}
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--surface);border-top:1px solid var(--line);
+  padding:6px max(16px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(16px,env(safe-area-inset-left,0px));
+  display:grid;grid-template-columns:repeat(4,1fr);max-width:none}
+nav.tabs button{background:none;border:0;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;font-weight:600;padding:6px 0;cursor:pointer}
+nav.tabs button svg{width:24px;height:24px}
+nav.tabs button[aria-current="page"]{color:var(--accent)}
+nav.tabs .add span.plus{width:40px;height:30px;border-radius:10px;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center}
+.toast{position:fixed;left:50%;bottom:calc(90px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:9px 16px;border-radius:999px;font-weight:600;font-size:13.5px;z-index:9}
+.streaks{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.streaks div{background:var(--surface-2);border-radius:12px;padding:10px;display:flex;flex-direction:column;gap:2px}
+.streaks b{font-family:var(--display);font-size:24px}
+.streaks span{font-size:11.5px;color:var(--muted)}
+.confirm{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+@media (max-width:380px){.big{font-size:38px}.kpi b{font-size:15px}}
+@media (prefers-reduced-motion:no-preference){.bet,.chip,.btn{transition:background .15s}}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1 id="viewTitle">Riepilogo</h1>
+      <div class="sub" id="viewSub">Il tuo bilancio di gioco</div>
+    </div>
+  </header>
+
+  <!-- RIEPILOGO -->
+  <section class="view" id="v-home">
+    <div class="banner" id="sampleBanner" hidden>
+      <span>Stai vedendo schedine di esempio.</span>
+      <button class="btn sm ghost" id="clearSamples" type="button">Rimuovi esempi</button>
+    </div>
+    <div class="chips" id="periodChips" role="group" aria-label="Periodo"></div>
+    <div class="hero">
+      <span class="label">Profitto netto</span>
+      <span class="big num" id="kProfit">0 €</span>
+      <span class="sub num" id="kStakeLine"></span>
+      <div class="kpis">
+        <div class="kpi"><b class="num" id="kRoi">–</b><span>ROI</span></div>
+        <div class="kpi"><b class="num" id="kWin">–</b><span>Vinte</span></div>
+        <div class="kpi"><b class="num" id="kOdds">–</b><span>Quota media</span></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="row"><h2>Andamento</h2><span class="sub">profitto cumulato</span></div>
+      <div id="chartBox"></div>
+    </div>
+    <div class="card">
+      <div class="row"><h2>Esiti</h2><span class="sub num" id="esitiCount"></span></div>
+      <div class="bar" id="esitiBar"></div>
+      <div class="row sub num" id="esitiLegend" style="flex-wrap:wrap;justify-content:flex-start;gap:14px"></div>
+    </div>
+    <div class="card">
+      <div class="row"><h2>Ultime schedine</h2><button class="btn sm ghost" type="button" data-go="list">Tutte</button></div>
+      <div class="list" id="recent"></div>
+    </div>
+    <p class="note" style="text-align:center">Gioca responsabilmente. Il gioco è vietato ai minori.</p>
+  </section>
+
+  <!-- LISTA -->
+  <section class="view" id="v-list" hidden>
+    <input id="search" type="search" placeholder="Cerca per sport o note…" aria-label="Cerca">
+    <div class="chips" id="esitoChips" role="group" aria-label="Filtra per esito"></div>
+    <div class="card"><div class="list" id="allList"></div></div>
+  </section>
+
+  <!-- AGGIUNGI / MODIFICA -->
+  <section class="view" id="v-add" hidden>
+    <form id="betForm" class="card" novalidate>
+      <div class="grid2">
+        <div class="field"><label for="fDate">Data</label><input id="fDate" type="date" required></div>
+        <div class="field"><label for="fSport">Sport</label>
+          <input id="fSport" list="sportList" placeholder="Calcio"><datalist id="sportList"></datalist></div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label for="fOdds">Quota</label><input id="fOdds" type="number" inputmode="decimal" step="0.01" min="1.01" placeholder="1.85" required></div>
+        <div class="field"><label for="fStake">Puntata (€)</label><input id="fStake" type="number" inputmode="decimal" step="0.5" min="0.1" placeholder="10" required></div>
+      </div>
+      <div class="field"><label>Esito</label>
+        <div class="seg" id="fEsito" role="group" aria-label="Esito">
+          <button type="button" data-v="vinta">Vinta</button>
+          <button type="button" data-v="persa">Persa</button>
+          <button type="button" data-v="rimborsata">Rimb.</button>
+          <button type="button" data-v="cashout">Cash out</button>
+          <button type="button" data-v="incorso">In corso</button>
+        </div>
+      </div>
+      <div class="field" id="cashField" hidden><label for="fCash">Importo incassato col cash out (€)</label><input id="fCash" type="number" inputmode="decimal" step="0.01" min="0"></div>
+      <div class="field"><label for="fNote">Note</label><input id="fNote" placeholder="Facoltative, es. multipla del sabato"></div>
+      <div class="preview num"><span id="pvLabel">Vincita potenziale</span><span id="pvValue">–</span></div>
+      <p class="note" id="formErr" hidden></p>
+      <button class="btn" type="submit" id="saveBtn">Salva schedina</button>
+      <div id="editActions" hidden class="confirm">
+        <button class="btn ghost" type="button" id="cancelEdit">Annulla</button>
+        <button class="btn danger" type="button" id="delBtn">Elimina</button>
+      </div>
+      <div id="delConfirm" hidden class="confirm">
+        <span class="note">Eliminare questa schedina?</span>
+        <button class="btn danger sm" type="button" id="delYes">Sì, elimina</button>
+        <button class="btn ghost sm" type="button" id="delNo">No</button>
+      </div>
+    </form>
+  </section>
+
+  <!-- ANALISI -->
+  <section class="view" id="v-stats" hidden>
+    <div class="chips" id="periodChips2" role="group" aria-label="Periodo"></div>
+    <div class="card">
+      <h2>Serie</h2>
+      <div class="streaks num" id="streaks"></div>
+      <div class="row sub num" id="extremes" style="flex-wrap:wrap"></div>
+    </div>
+    <div class="card"><h2>Per sport</h2><div class="scroll" id="tSport"></div></div>
+    <div class="card"><h2>Per fascia di quota</h2><div class="scroll" id="tOdds"></div></div>
+    <div class="card"><h2>Per mese</h2><div class="scroll" id="tMonth"></div></div>
+    <div class="card">
+      <h2>Backup dei dati</h2>
+      <p class="note">I dati restano salvati solo su questo dispositivo e in questo browser. Copia il backup ogni tanto e incollalo per ripristinarlo o spostarlo su un altro telefono.</p>
+      <div class="confirm">
+        <button class="btn sm" type="button" id="expJson">Copia backup</button>
+        <button class="btn sm ghost" type="button" id="expCsv">Copia CSV</button>
+        <button class="btn sm ghost" type="button" id="impBtn">Ripristina</button>
+      </div>
+      <textarea id="ioBox" aria-label="Backup" placeholder="Il backup apparirà qui. Per ripristinare, incolla qui il testo e premi Ripristina."></textarea>
+      <p class="note">Per usarla come app: in Safari tocca Condividi, poi «Aggiungi alla schermata Home».</p>
+    </div>
+  </section>
+</div>
+
+<nav class="tabs" aria-label="Sezioni">
+  <button type="button" data-go="home" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 19V10M10 19V5M16 19v-7M22 19H2"/></svg>Riepilogo</button>
+  <button type="button" data-go="list"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>Schedine</button>
+  <button type="button" data-go="add" class="add"><span class="plus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" style="width:20px;height:20px"><path d="M12 5v14M5 12h14"/></svg></span>Aggiungi</button>
+  <button type="button" data-go="stats"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 3v9l6.5 6"/></svg>Analisi</button>
+</nav>
+<div class="toast" id="toast" hidden></div>
+
+<script>
+const KEY='registro-schedine-v1';
+const ESITI={vinta:'Vinta',persa:'Persa',rimborsata:'Rimborsata',cashout:'Cash out',incorso:'In corso'};
+const eur=n=>(n<0?'−':'')+Math.abs(n).toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2})+' €';
+const sgn=n=>(n>0?'+':'')+eur(n);
+const pct=n=>isFinite(n)?(n>0?'+':'')+n.toLocaleString('it-IT',{maximumFractionDigits:1})+'%':'–';
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const $=id=>document.getElementById(id);
+
+function sample(){
+  const t=new Date(); const d=k=>{const x=new Date(t);x.setDate(x.getDate()-k);return x.toISOString().slice(0,10)};
+  const rows=[
+    [62,'Calcio','Bari – Sampdoria','1X2','Snai',2.10,10,'persa'],[58,'Calcio','Inter – Juventus','Goal','Sisal',1.72,15,'vinta'],
+    [55,'Tennis','Sinner – Rune','Testa a testa','Snai',1.35,20,'vinta'],[51,'Calcio','Napoli – Roma','Over 2.5','Bet365',1.95,10,'persa'],
+    [47,'Basket','Olimpia Milano – Virtus','1X2','Sisal',1.80,10,'vinta'],[44,'Calcio','Lecce – Bologna','X','Snai',3.30,5,'persa'],
+    [40,'Calcio','Milan – Atalanta','Goal','Bet365',1.68,15,'vinta'],[36,'Tennis','Alcaraz – Zverev','Testa a testa','Snai',1.55,20,'persa'],
+    [33,'Calcio','Multipla 4 eventi','Multipla','Sisal',8.40,5,'persa'],[29,'Calcio','Fiorentina – Torino','1X','Bet365',1.40,25,'vinta'],
+    [26,'Calcio','Lazio – Genoa','Over 1.5','Snai',1.30,30,'vinta'],[22,'Basket','Lakers – Celtics','Over 220.5','Bet365',1.90,10,'rimborsata'],
+    [19,'Calcio','Juventus – Napoli','Under 2.5','Sisal',1.85,10,'persa'],[15,'Calcio','Bari – Palermo','1X2','Snai',2.25,10,'vinta'],
+    [12,'Tennis','Musetti – Fritz','Testa a testa','Snai',2.05,10,'cashout',14],[8,'Calcio','Multipla 3 eventi','Multipla','Sisal',5.20,5,'persa'],
+    [5,'Calcio','Roma – Milan','Goal','Bet365',1.75,15,'vinta'],[3,'Calcio','Atalanta – Inter','Over 2.5','Snai',1.80,10,'persa'],
+    [1,'Calcio','Bologna – Lazio','1X2','Sisal',2.40,10,'vinta'],[0,'Calcio','Napoli – Lecce','Over 2.5','Snai',1.62,10,'incorso']];
+  return rows.map((r,i)=>({id:'s'+i,date:d(r[0]),sport:r[1],odds:r[5],stake:r[6],esito:r[7],cash:r[8]||0,note:'',sample:true}));
+}
+let bets; try{bets=JSON.parse(localStorage.getItem(KEY))}catch(e){bets=null}
+if(!Array.isArray(bets)) bets=sample();
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(bets))}catch(e){}};
+
+function profit(b){
+  if(b.esito==='vinta')return b.stake*(b.odds-1);
+  if(b.esito==='persa')return -b.stake;
+  if(b.esito==='cashout')return (b.cash||0)-b.stake;
+  return 0;
+}
+const settled=b=>b.esito!=='incorso';
+
+let period='all';
+const PERIODS=[['all','Tutto'],['30','30 giorni'],['month','Questo mese'],['year',"Quest'anno"]];
+function inPeriod(b){
+  if(period==='all')return true;
+  const now=new Date(), d=new Date(b.date+'T12:00');
+  if(period==='30')return (now-d)/864e5<=30;
+  if(period==='month')return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();
+  return d.getFullYear()===now.getFullYear();
+}
+const sorted=arr=>[...arr].sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:0);
+
+function summary(arr){
+  const s=arr.filter(settled), staked=s.reduce((t,b)=>t+b.stake,0), pl=s.reduce((t,b)=>t+profit(b),0);
+  const decided=s.filter(b=>b.esito==='vinta'||b.esito==='persa');
+  const won=decided.filter(b=>b.esito==='vinta').length;
+  return {n:arr.length,ns:s.length,staked,pl,roi:staked?pl/staked*100:NaN,
+    win:decided.length?won/decided.length*100:NaN,
+    odds:s.length?s.reduce((t,b)=>t+b.odds,0)/s.length:NaN,won,lost:decided.length-won};
+}
+
+function renderChips(boxId){
+  $(boxId).innerHTML=PERIODS.map(([k,l])=>`<button class="chip" type="button" data-p="${k}" aria-pressed="${k===period}">${l}</button>`).join('');
+}
+document.addEventListener('click',e=>{
+  const p=e.target.closest('[data-p]'); if(p){period=p.dataset.p;renderAll();}
+  const g=e.target.closest('[data-go]'); if(g){if(g.dataset.go==='add')openForm();go(g.dataset.go);}
+  const b=e.target.closest('[data-id]'); if(b){openForm(b.dataset.id);go('add');}
+});
+
+function betRow(b){
+  const p=profit(b);
+  const plTxt=b.esito==='incorso'?'vinc. '+eur(b.stake*b.odds):sgn(p);
+  const cls=b.esito==='incorso'?'':p>0?'pos':p<0?'neg':'';
+  const date=new Date(b.date+'T12:00').toLocaleDateString('it-IT',{day:'numeric',month:'short'});
+  return `<button class="bet" type="button" data-id="${b.id}">
+    <span class="ev">${esc(b.sport||'Scommessa')} · quota ${b.odds.toFixed(2)}</span><span class="pl num ${cls}">${plTxt}</span>
+    <span class="meta num">${date} · puntata ${eur(b.stake)}${b.note?' · '+esc(b.note):''}</span>
+    <span class="pill p-${b.esito}">${ESITI[b.esito]}</span></button>`;
+}
+
+function chart(arr){
+  const s=sorted(arr.filter(settled));
+  if(s.length<2)return '<p class="empty">Servono almeno due schedine chiuse per il grafico.</p>';
+  let c=0; const pts=[0,...s.map(b=>c+=profit(b))];
+  const W=340,H=150,pl=44,pr=8,pt=10,pb=22;
+  let mn=Math.min(0,...pts),mx=Math.max(0,...pts); if(mx===mn)mx=mn+1;
+  const step=niceStep((mx-mn)/4); mn=Math.floor(mn/step)*step; mx=Math.ceil(mx/step)*step;
+  const x=i=>pl+i*(W-pl-pr)/(pts.length-1), y=v=>pt+(mx-v)*(H-pt-pb)/(mx-mn);
+  let grid='';for(let v=mn;v<=mx+1e-9;v+=step){grid+=`<line x1="${pl}" x2="${W-pr}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line)" stroke-width="${Math.abs(v)<1e-9?1.2:.6}"/><text x="${pl-6}" y="${y(v)+3.5}" text-anchor="end" font-size="9.5" fill="var(--muted)">${Math.round(v)}€</text>`}
+  const line=pts.map((v,i)=>`${i?'L':'M'}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join('');
+  const last=pts[pts.length-1], col=last>=0?'var(--win)':'var(--loss)';
+  const area=line+`L${x(pts.length-1)},${y(0)}L${x(0)},${y(0)}Z`;
+  const fmt=d=>new Date(d+'T12:00').toLocaleDateString('it-IT',{day:'numeric',month:'short'});
+  return `<svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="Profitto cumulato">${grid}
+    <path d="${area}" fill="${col}" fill-opacity=".12"/>
+    <path d="${line}" fill="none" stroke="${col}" stroke-width="2.2" stroke-linejoin="round"/>
+    <circle cx="${x(pts.length-1)}" cy="${y(last)}" r="4" fill="${col}"/>
+    <text x="${pl}" y="${H-6}" font-size="9.5" fill="var(--muted)">${fmt(s[0].date)}</text>
+    <text x="${W-pr}" y="${H-6}" font-size="9.5" fill="var(--muted)" text-anchor="end">${fmt(s[s.length-1].date)}</text></svg>`;
+}
+function niceStep(r){const p=Math.pow(10,Math.floor(Math.log10(r||1)));const f=r/p;return (f<=1?1:f<=2?2:f<=5?5:10)*p}
+
+function renderHome(){
+  renderChips('periodChips');
+  const arr=bets.filter(inPeriod), s=summary(arr);
+  $('sampleBanner').hidden=!bets.some(b=>b.sample);
+  const kp=$('kProfit'); kp.textContent=sgn(s.pl); kp.className='big num '+(s.pl>0?'pos':s.pl<0?'neg':'');
+  $('kStakeLine').textContent=`${eur(s.staked)} giocati su ${s.ns} schedine chiuse`+(s.n-s.ns?` · ${s.n-s.ns} in corso`:'');
+  $('kRoi').textContent=pct(s.roi); $('kRoi').className='num '+(s.roi>0?'pos':s.roi<0?'neg':'');
+  $('kWin').textContent=isFinite(s.win)?Math.round(s.win)+'%':'–';
+  $('kOdds').textContent=isFinite(s.odds)?s.odds.toFixed(2):'–';
+  $('chartBox').innerHTML=chart(arr);
+  const cnt={};Object.keys(ESITI).forEach(k=>cnt[k]=arr.filter(b=>b.esito===k).length);
+  const colors={vinta:'var(--win)',persa:'var(--loss)',rimborsata:'var(--void)',cashout:'var(--void)',incorso:'var(--open)'};
+  $('esitiCount').textContent=arr.length+' totali';
+  $('esitiBar').innerHTML=arr.length?Object.keys(cnt).map(k=>`<i style="width:${cnt[k]/arr.length*100}%;background:${colors[k]}"></i>`).join(''):'';
+  $('esitiLegend').innerHTML=Object.keys(cnt).filter(k=>cnt[k]).map(k=>`<span><span style="color:${colors[k]}">●</span> ${ESITI[k]} ${cnt[k]}</span>`).join('');
+  const rec=sorted(arr).reverse().slice(0,5);
+  $('recent').innerHTML=rec.length?rec.map(betRow).join(''):'<p class="empty">Nessuna schedina in questo periodo. Tocca «Aggiungi» per registrare la prima.</p>';
+}
+
+let esitoFilter='all';
+function renderList(){
+  $('esitoChips').innerHTML=[['all','Tutte'],...Object.entries(ESITI)].map(([k,l])=>`<button class="chip" type="button" data-ef="${k}" aria-pressed="${k===esitoFilter}">${l}</button>`).join('');
+  const q=$('search').value.trim().toLowerCase();
+  const arr=sorted(bets).reverse().filter(b=>(esitoFilter==='all'||b.esito===esitoFilter)&&(!q||[b.sport,b.note].join(' ').toLowerCase().includes(q)));
+  $('allList').innerHTML=arr.length?arr.map(betRow).join(''):'<p class="empty">Nessuna schedina trovata.</p>';
+}
+$('esitoChips').addEventListener('click',e=>{const c=e.target.closest('[data-ef]');if(c){esitoFilter=c.dataset.ef;renderList();}});
+$('search').addEventListener('input',renderList);
+
+function groupTable(arr,keyFn,order){
+  const g={};arr.filter(settled).forEach(b=>{const k=keyFn(b)||'—';(g[k]=g[k]||[]).push(b)});
+  let keys=Object.keys(g); if(order)keys=order.filter(k=>g[k]); else keys.sort((a,b)=>g[b].length-g[a].length);
+  if(!keys.length)return '<p class="empty">Nessun dato.</p>';
+  return `<table class="tbl num"><thead><tr><th></th><th>N.</th><th>Vinte</th><th>Profitto</th><th>ROI</th></tr></thead><tbody>${keys.map(k=>{const s=summary(g[k]);
+    return `<tr><td>${esc(k)}</td><td>${s.ns}</td><td>${isFinite(s.win)?Math.round(s.win)+'%':'–'}</td><td class="${s.pl>0?'pos':s.pl<0?'neg':''}">${sgn(s.pl)}</td><td class="${s.roi>0?'pos':s.roi<0?'neg':''}">${pct(s.roi)}</td></tr>`}).join('')}</tbody></table>`;
+}
+const BANDS=['1.01–1.49','1.50–1.99','2.00–2.99','3.00–4.99','5.00+'];
+const band=o=>o<1.5?BANDS[0]:o<2?BANDS[1]:o<3?BANDS[2]:o<5?BANDS[3]:BANDS[4];
+
+function renderStats(){
+  renderChips('periodChips2');
+  const arr=bets.filter(inPeriod), s=sorted(arr.filter(b=>b.esito==='vinta'||b.esito==='persa'));
+  let maxW=0,maxL=0,cw=0,cl=0;s.forEach(b=>{if(b.esito==='vinta'){cw++;cl=0}else{cl++;cw=0}maxW=Math.max(maxW,cw);maxL=Math.max(maxL,cl)});
+  const cur=cw?`<b class="pos">${cw}</b><span>vinte di fila ora</span>`:cl?`<b class="neg">${cl}</b><span>perse di fila ora</span>`:'<b>0</b><span>serie attuale</span>';
+  $('streaks').innerHTML=`<div><b class="pos">${maxW}</b><span>max vinte di fila</span></div><div><b class="neg">${maxL}</b><span>max perse di fila</span></div><div>${cur}</div>`;
+  const cl2=arr.filter(settled);
+  if(cl2.length){const best=cl2.reduce((a,b)=>profit(b)>profit(a)?b:a),worst=cl2.reduce((a,b)=>profit(b)<profit(a)?b:a);
+    $('extremes').innerHTML=`<span>Miglior vincita: <b class="pos">${sgn(profit(best))}</b> (${esc(best.sport)} @${best.odds.toFixed(2)})</span><span>Peggior perdita: <b class="neg">${sgn(profit(worst))}</b></span>`;}
+  else $('extremes').innerHTML='';
+  $('tSport').innerHTML=groupTable(arr,b=>b.sport);
+  $('tOdds').innerHTML=groupTable(arr,b=>band(b.odds),BANDS);
+  const months=[...new Set(sorted(arr).map(b=>b.date.slice(0,7)))].reverse();
+  const mName=m=>new Date(m+'-15').toLocaleDateString('it-IT',{month:'long',year:'numeric'});
+  $('tMonth').innerHTML=groupTable(arr,b=>mName(b.date.slice(0,7)),months.map(mName));
+}
+
+/* FORM */
+let editing=null, esito='vinta';
+function setEsito(v){esito=v;[...$('fEsito').children].forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===v));$('cashField').hidden=v!=='cashout';preview();}
+$('fEsito').addEventListener('click',e=>{const b=e.target.closest('[data-v]');if(b)setEsito(b.dataset.v)});
+function fillLists(){
+  const u=k=>[...new Set(bets.map(b=>b[k]).filter(Boolean))];
+  $('sportList').innerHTML=[...new Set(['Calcio','Tennis','Basket','Pallavolo','Formula 1','MotoGP',...u('sport')])].map(v=>`<option value="${esc(v)}">`).join('');
+}
+function openForm(id){
+  fillLists(); editing=id?bets.find(b=>b.id===id):null; const b=editing;
+  $('fDate').value=b?b.date:new Date().toISOString().slice(0,10);
+  $('fSport').value=b?b.sport:'Calcio'; $('fOdds').value=b?b.odds:''; $('fStake').value=b?b.stake:'';
+  $('fCash').value=b&&b.cash?b.cash:''; $('fNote').value=b?b.note:'';
+  setEsito(b?b.esito:'incorso');
+  $('saveBtn').textContent=b?'Salva modifiche':'Salva schedina';
+  $('editActions').hidden=!b; $('delConfirm').hidden=true; $('formErr').hidden=true;
+}
+function preview(){
+  const o=parseFloat($('fOdds').value),s=parseFloat($('fStake').value);
+  if(!(o>1&&s>0)){$('pvLabel').textContent='Vincita potenziale';$('pvValue').textContent='–';$('pvValue').className='';return;}
+  const tmp={odds:o,stake:s,esito,cash:parseFloat($('fCash').value)||0};
+  if(esito==='incorso'){$('pvLabel').textContent='Vincita potenziale';$('pvValue').textContent=eur(o*s);$('pvValue').className='';}
+  else{const p=profit(tmp);$('pvLabel').textContent='Profitto';$('pvValue').textContent=sgn(p);$('pvValue').className=p>0?'pos':p<0?'neg':'';}
+}
+['fOdds','fStake','fCash'].forEach(i=>$(i).addEventListener('input',preview));
+$('betForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  const o=parseFloat(String($('fOdds').value).replace(',','.')),s=parseFloat(String($('fStake').value).replace(',','.'));
+  const err=!(o>1)?'La quota deve essere maggiore di 1.':!(s>0)?'Inserisci la puntata in euro.':!$('fDate').value?'Scegli la data.':'';
+  if(err){$('formErr').textContent=err;$('formErr').hidden=false;return;}
+  const data={date:$('fDate').value,sport:$('fSport').value.trim(),
+    odds:o,stake:s,esito,cash:esito==='cashout'?(parseFloat($('fCash').value)||0):0,note:$('fNote').value.trim()};
+  if(editing){Object.assign(editing,data);delete editing.sample;}
+  else bets.push({id:'b'+Date.now().toString(36),...data});
+  save(); toast(editing?'Modifiche salvate':'Schedina salvata'); renderAll(); go('home');
+});
+$('cancelEdit').onclick=()=>go('list');
+$('delBtn').onclick=()=>{$('delConfirm').hidden=false;$('editActions').hidden=true};
+$('delNo').onclick=()=>{$('delConfirm').hidden=true;$('editActions').hidden=false};
+$('delYes').onclick=()=>{bets=bets.filter(b=>b!==editing);save();toast('Schedina eliminata');renderAll();go('list');};
+$('clearSamples').onclick=()=>{bets=bets.filter(b=>!b.sample);save();toast('Esempi rimossi');renderAll();};
+
+/* BACKUP */
+async function copy(text,msg){$('ioBox').value=text;try{await navigator.clipboard.writeText(text);toast(msg)}catch(e){$('ioBox').select();toast('Testo pronto: selezionalo e copialo')}}
+$('expJson').onclick=()=>copy(JSON.stringify(bets),'Backup copiato');
+$('expCsv').onclick=()=>{const h='data;sport;quota;puntata;esito;incasso;profitto;note';
+  copy([h,...sorted(bets).map(b=>[b.date,b.sport,String(b.odds).replace('.',','),String(b.stake).replace('.',','),ESITI[b.esito],String(b.cash||0).replace('.',','),profit(b).toFixed(2).replace('.',','),b.note].map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(';'))].join('\n'),'CSV copiato');};
+$('impBtn').onclick=()=>{try{const d=JSON.parse($('ioBox').value);if(!Array.isArray(d)||d.some(b=>!b.id||!b.date||!(b.odds>0)))throw 0;bets=d;save();renderAll();toast('Dati ripristinati');}
+  catch(e){toast('Il testo incollato non è un backup valido')}};
+
+let tt;function toast(m){const t=$('toast');t.textContent=m;t.hidden=false;clearTimeout(tt);tt=setTimeout(()=>t.hidden=true,2200)}
+
+const VIEWS={home:['Riepilogo','Il tuo bilancio di gioco'],list:['Schedine','Tocca una schedina per modificarla'],add:['Schedina','Registra o modifica una giocata'],stats:['Analisi','Dove guadagni e dove perdi']};
+function go(v){
+  Object.keys(VIEWS).forEach(k=>$('v-'+k).hidden=k!==v);
+  document.querySelectorAll('nav.tabs [data-go]').forEach(b=>b.toggleAttribute('aria-current',b.dataset.go===v)||b.dataset.go===v&&b.setAttribute('aria-current','page'));
+  document.querySelectorAll('nav.tabs [data-go]').forEach(b=>{if(b.dataset.go===v)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});
+  $('viewTitle').textContent=v==='add'&&editing?'Modifica':v==='add'?'Nuova schedina':VIEWS[v][0]; $('viewSub').textContent=VIEWS[v][1];
+  window.scrollTo(0,0);
+}
+function renderAll(){renderHome();renderList();renderStats();}
+renderAll();
+if('serviceWorker' in navigator){addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));}
+</script>
+
+</body>
+</html>
